@@ -117,7 +117,7 @@ values."
    ;; (default 'vim)
    dotspacemacs-editing-style 'emacs
    ;; If non nil output loading progress in `*Messages*' buffer. (default nil)
-   dotspacemacs-verbose-loading nil
+   dotspacemacs-verbose-loading t
    ;; Specify the startup banner. Default value is `official', it displays
    ;; the official spacemacs logo. An integer value is the index of text
    ;; banner, `random' chooses a random text banner in `core/banners'
@@ -333,64 +333,10 @@ you should place your code here."
   (setq org-startup-with-inline-images t)
   (require 'helm-bookmark)
   (delete-selection-mode 1)
+  (cua-mode 1)
 
-  ;; Fix separators
-  ;; (setq ns-use-srgb-colorspace nil)
-  ;; (setq powerline-default-separator 'utf-8)
-  ;; Theme Customizations
-  ;; (setq theming-modifications
-  ;;      '((solarized
-           ;; Provide a sort of "on-off" modeline whereby the current buffer has a nice
-           ;; bright blue background, and all the others are in cream.
-           ;; TODO: Change to use variables here. However, got error:
-           ;; (Spacemacs) Error in dotspacemacs/user-config: Wrong type argument: stringp, pd-blue
-  ;;         (mode-line :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
-  ;;         (powerline-active1 :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
-  ;;         (powerline-active2 :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
-  ;;         (mode-line-inactive :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
-  ;;         (powerline-inactive1 :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
-  ;;         (powerline-inactive2 :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
-           ;; Make a really prominent helm selection line.
-  ;;         (helm-selection :foreground "white" :background "#2075c7" :inverse-video nil)
-           ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
-  ;;         (cursor :background "#b58900")
-  ;;         )))
-
-  ;; tilde
-  (defun tilde () (interactive) (insert "~"))
-  (global-set-key (kbd "M-é") 'tilde)
-
-  ;; sharp
-  (defun sharp () (interactive) (insert "#"))
-  (global-set-key (kbd "M-\"") 'sharp)
-
-  ;; backslash
-  (defun bslash () (interactive) (insert "\\"))
-  (global-set-key (kbd "M-_") 'bslash)
-
-  ;; opening brace
-  (defun obrace () (interactive) (insert "{"))
-  (global-set-key (kbd "M-'") 'obrace)
-
-  ;; closing brace
-  (defun cbrace () (interactive) (insert "}"))
-  (global-set-key (kbd "M-=") 'cbrace)
-
-  ;; opening square bracket
-  (defun osquare () (interactive) (insert "["))
-  (global-set-key (kbd "M-(") 'osquare)
-
-  ;; closing square bracket
-  (defun csquare () (interactive) (insert "]"))
-  (global-set-key (kbd "M-)") 'csquare)
-
-  ;; pipe
-  (defun pipe () (interactive) (insert "|"))
-  (global-set-key (kbd "M--") 'pipe)
-
-  ;; at
-  (defun at () (interactive) (insert "@"))
-  (global-set-key (kbd "M-à") 'at)
+  (global-set-key (kbd "M-<up>") 'move-text-up)
+  (global-set-key (kbd "M-<down>") 'move-text-down)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
