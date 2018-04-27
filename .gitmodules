@@ -1,0 +1,6 @@
+[submodule "spacemacs/spacemacs"]
+	path = spacemacs/spacemacs
+	url = git@github.com:AlEmerich/spacemacs.git
+[submodule "spacemacs/.emacs.d"]
+	path = spacemacs/.emacs.d
+	url = git@github.com:AlEmerich/spacemacs.git
