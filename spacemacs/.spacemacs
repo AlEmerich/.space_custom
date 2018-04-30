@@ -63,7 +63,7 @@ values."
      ;; better-defaults
      emacs-lisp
      git
-     shaders
+     ;; shaders
      imenu-list
      latex
      markdown
@@ -166,7 +166,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
+                               :size 20
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -349,8 +349,18 @@ you should place your code here."
   (delete-selection-mode 1)
   (cua-mode 1)
 
+  (defun copy-line (arg)
+    "Copy lines (as many as prefix argument) in the kill ring"
+    (interactive "p")
+    (kill-ring-save (line-beginning-position)
+                    (line-beginning-position (+ 1 arg)))
+    (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
+
   (global-set-key (kbd "M-<up>") 'move-text-up)
   (global-set-key (kbd "M-<down>") 'move-text-down)
+  (global-set-key (kbd "\C-d") 'copy-line)
+  (global-set-key (kbd "\C-c d") 'avy-copy-line)
+  (global-set-key (kbd "\C-c r") 'avy-copy-region)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
