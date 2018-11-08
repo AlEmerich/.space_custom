@@ -1,3 +1,4 @@
+
 ;; -*- mode: emacs-lisp -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
@@ -30,7 +31,8 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(lua
+   '(systemd
+     lua
      csv
      yaml
      html
@@ -66,6 +68,7 @@ values."
      imenu-list
      latex
      markdown
+     docker
      ;; org
      (shell :variables
             shell-default-shell 'ansi-term
@@ -382,74 +385,565 @@ you should place your code here."
 
   (require 'ox-taskjuggler)
 
+  ;;====================== MAIL =============================
+
   ;; MU4E
   (require 'mu4e)
 
-  ;; use mu4e for e-mail in emacs
+  ;; emacs allows you to select an e-mail program as the default program it uses when you press C-x m (compose-mail), call report-emacs-bug and so on.
+  ;; If you want to use mu4e for this, you do so by adding the following to your configuration:
   (setq mail-user-agent 'mu4e-user-agent)
 
-  ;; default
-  (setq mu4e-maildir "~/Maildir")
+  ;; don't keep message buffers around
+  (setq message-kill-buffer-on-exit t)
 
-  (setq mu4e-drafts-folder "/[Gmail].Drafts")
-  (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
-  (setq mu4e-trash-folder  "/[Gmail].Bin")
+  ;; no need to confirm
+  (setq mu4e-confirm-quit nil)
 
-  ;; don't save message to Sent Messages, Gmail/IMAP takes care of this
+  ;; display is definitely nicer with these
+  (setq mu4e-use-fancy-chars t)
+
+  ;; open mail links in new frame
+  ;;(defun mu4e-link-in-new-frame (MSGID) (select-frame (make-frame)))
+  ;;(advice-add 'mu4e-view-message-with-message-id :before 'mu4e-link-in-new-frame)
+
+  ;; single window mode (not useful to me, I like to have the split windows)
+  ;;(setq mu4e-split-view 'single-window) 
+
+  ;;mu4e buffers have a leading space...
+  ;;" *mu4e-main"
+
+  ;;------------------ servers
+
+  (when (fboundp 'imagemagick-register-types)
+    (imagemagick-register-types))
+  
+  ;; get mail
+  (setq mu4e-get-mail-command "/usr/bin/mbsync -a" ;; -c ~/.mbsyncrc gmail" ;;use U in main view to update
+        ;; mu4e-html2text-command "html2text -utf8 -width 72" ;;seems to be doing a better job than w3m
+        ;; w3m-command "/usr/bin/w3m"
+        ;; mu4e-html2text-command "w3m -dump -T text/html"
+        ;; mu4e-html2text-command "w3m -dump -T text/html -cols 72 -o display_link_number=true -o auto_image=false -o display_image=false -o ignore_null_img_alt=true"
+        mu4e-update-interval 60 ;;every minute
+        mu4e-headers-auto-update t
+        mu4e-view-prefer-html t
+        mu4e-view-show-images t
+        mu4e-view-show-addresses t
+        )
+
+  ;; don't keep message buffers around
+  (setq message-kill-buffer-on-exit t)
+
+  ;; You can then get your e-mail using M-x mu4e-update-mail-and-index, or C-S-u in all mu4e-views;
+  ;; alternatively, you can use C-c C-u, which may be more convenient if you use emacs in a terminal.
+  ;;You can kill the (foreground) update process with q.
+
+  ;; faster indexing, if that becomes a problem
+                                        ;(setq
+                                        ;  mu4e-index-cleanup nil      ;; don't do a full cleanup check
+                                        ;  mu4e-index-lazy-check t)    ;; don't consider up-to-date dirs
+
+  ;;------------------ folders, search
+
+  ;; defaults
+  (setq mu4e-maildir (expand-file-name "~/.mail"))
+  ;; better to keep .mail and make link
+  ;; don't do: (setq mu4e-maildir (expand-file-name "/media/DATA/Mail"))
+  ;; but do: /!!!\ ln -s "/media/DATA/Mail" .mail
+
+  ;; don't save message to Sent Messages, IMAP takes care of this
   (setq mu4e-sent-messages-behavior 'delete)
 
-  ;; (See the documentation for `mu4e-sent-messages-behavior' if you have
-  ;; additional non-Gmail addresses and want assign them different
-  ;; behavior.)
-
-  ;; setup some handy shortcuts
+  ;; shortcuts
   ;; you can quickly switch to your Inbox -- press ``ji''
   ;; then, when you want archive some messages, move them to
   ;; the 'All Mail' folder by pressing ``ma''.
-
   (setq mu4e-maildir-shortcuts
-        '( ("/INBOX"               . ?i)
-           ("/[Gmail].Sent Mail"   . ?s)
-           ("/[Gmail].Trash"       . ?t)
-           ("/[Gmail].All Mail"    . ?a)))
+        '( ("/Inbox"                    . ?i)
+           ("/sent"  . ?s)
+           ("/trash"      . ?t)
+           ("/drafts"     . ?d)))
 
-  ;; allow for updating mail using 'U' in the main view:
-  (setq mu4e-get-mail-command "offlineimap"
-        mu4e-update-interval 10)
+
+  ;;rename files when moving
+  ;;NEEDED FOR MBSYNC
+  (setq mu4e-change-filenames-when-moving t)
+
+  ;; unbind default bookmarks
+  (makunbound 'mu4e-bookmarks)
+  (defvar mu4e-bookmarks
+    `( ,(make-mu4e-bookmark
+         :name  "Unread @CEA"
+         :query "maildir:/Inbox AND flag:unread"
+         :key ?u)))
+  ;; bookmarks
+  (add-to-list 'mu4e-bookmarks
+               (make-mu4e-bookmark
+                :name  "Today @CEA"
+                :query "maildir:/Inbox AND date:today..now"
+                :key ?t)  )
+  (add-to-list 'mu4e-bookmarks
+               (make-mu4e-bookmark
+                :name  "Last 7 days @CEA"
+                :query "maildir:/Inbox AND date:7d..now"
+                :key ?w)  )
+  (add-to-list 'mu4e-bookmarks
+               (make-mu4e-bookmark
+                :name  "w/ attachment @CEA"
+                :query "maildir:/Inbox AND flag:attach"
+                :key ?a)  )
+  (add-to-list 'mu4e-bookmarks
+               (make-mu4e-bookmark
+                :name  "Big messages @CEA"
+                :query "maildir:/Inbox AND size:5M..500M"
+                :key ?b)  )
+
+  ;;------------------ addresses
 
   ;; something about ourselves
   (setq
    user-mail-address "alan.guitard.pro@gmail.com"
    user-full-name  "Alan Guitard"
    mu4e-compose-signature
-    (concat
-      "Alan Guitard\n"
-      "GitHub: https://github.com/AlEmerich\n"
-      "LinkedIn: https://linkedin.com/in/alanguitard"))
+   (concat
+    "Alan Guitard\n"
+    "GitHub: https://github.com/AlEmerich\n"
+    "LinkedIn: https://linkedin.com/in/alanguitard"))
 
-  ;; sending mail -- replace USERNAME with your gmail username
-  ;; also, make sure the gnutls command line utils are installed
-  ;; package 'gnutls-bin' in Debian/Ubuntu
+  ;; To determine whether a message was sent by you, mu4e uses the variable mu4e-user-mail-address-list, a list of your e-mail addresses.
+  (setq mu4e-user-mail-address-list '("guitard-alan@laposte.net" "alan.guitard.pro@gmail.com"))
 
+
+  ;;------------------ compose
+
+  ;; list of contacts
+  ;;in shell: mu cfind
+
+  ;; allows reading other emails while composing
+  ;; (setq mu4e-compose-in-new-frame t)
+
+  ;; please don't ever include me when I reply...
+  (setq mu4e-compose-dont-reply-to-self t)
+
+  ;; signature
+  ;; (setq message-signature-file "/signature.txt") ; put your signature in this file
+  ;;mu4e-compose-signature-auto-include nil
+
+  ;; don't save message to Sent Messages, IMAP takes care of this in gmail
+  (setq mu4e-sent-messages-behavior 'delete) ;redefined in contexts
+
+  ;; spell check
+  (add-hook 'mu4e-compose-mode-hook
+            (defun my-do-compose-stuff ()
+              "My settings for message composition."
+              (set-fill-column 72)
+              (flyspell-mode)))
+
+  ;; SMTP
   (require 'smtpmail)
+
+  ;; configuration for sending mail
   (setq message-send-mail-function 'smtpmail-send-it
-        starttls-use-gnutls t
-        smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
-        smtpmail-auth-credentials
-        '(("smtp.gmail.com" 587 "alan.guitard.pro@gmail.com" nil))
+        smtpmail-stream-type 'starttls
         smtpmail-default-smtp-server "smtp.gmail.com"
         smtpmail-smtp-server "smtp.gmail.com"
         smtpmail-smtp-service 587)
 
-  ;; alternatively, for emacs-24 you can use:
-  ;;(setq message-send-mail-function 'smtpmail-send-it
-  ;;     smtpmail-stream-type 'starttls
-  ;;     smtpmail-default-smtp-server "smtp.gmail.com"
-  ;;     smtpmail-smtp-server "smtp.gmail.com"
-  ;;     smtpmail-smtp-service 587)
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-debug-info t)
 
-  ;; don't keep message buffers around
-  (setq message-kill-buffer-on-exit t)
+  ;; following, when set to t, only consider addresses that were seen in personal messages — that is, messages in which one of my e-mail addresses (mu4e-user-mail-address-list) was seen in one of the address fields. This is to exclude mailing list posts.
+  ;;(setq mu4e-compose-complete-only-personal t) ;;somehow removes everything... maybe wait till full sync is done?
+
+  ;; warn if no attachments
+  (defun message-attachment-present-p ()
+    "Return t if an attachment is found in the current message."
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (when (search-forward "<#part" nil t) t))))
+  (defcustom message-attachment-intent-re
+    (regexp-opt '("attach"
+                  "attached"
+                  "fichier joint"
+                  "PDF"
+                  "attachment"))
+    "A regex which - if found in the message, and if there is no attachment - should launch the no-attachment warning.")
+  (defcustom message-attachment-reminder
+    "Are you sure you want to send this message without any attachment? "
+    "The default question asked when trying to send a message containing `message-attachment-intent-re' without an actual attachment.")
+  (defun message-warn-if-no-attachments ()
+    "Ask the user if s?he wants to send the message even though there are no attachments."
+    (when (and (save-excursion
+                 (save-restriction
+                   (widen)
+                   (goto-char (point-min))
+                   (re-search-forward message-attachment-intent-re nil t)))
+               (not (message-attachment-present-p)))
+      (unless (y-or-n-p message-attachment-reminder)
+        (keyboard-quit))))
+  ;; add hook to message-send-hook (so also works with gnus)
+  (add-hook 'message-send-hook #'message-warn-if-no-attachments)
+
+  ;; It is possible to attach files to mu4e messages (using dired in the same frame process...)
+  ;; mark the file(s) in dired you would like to attach and press C-c RET C-a, and you’ll be asked whether to attach them to an existing message, or create a new one.
+  (require 'gnus-dired)
+  ;; make the `gnus-dired-mail-buffers' function also work on
+  ;; message-mode derived modes, such as mu4e-compose-mode
+  (defun gnus-dired-mail-buffers ()
+    "Return a list of active message buffers."
+    (let (buffers)
+      (save-current-buffer
+        (dolist (buffer (buffer-list t))
+          (set-buffer buffer)
+          (when (and (derived-mode-p 'message-mode)
+                     (null message-sent-message-via))
+            (push (buffer-name buffer) buffers))))
+      (nreverse buffers)))
+  (setq gnus-dired-mail-mode 'mu4e-user-agent)
+  (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode)
+
+  ;; highlight some words
+  ;; http://emacs-fu.blogspot.co.uk/2008/12/highlighting-todo-fixme-and-friends.html
+  (set-face-attribute 'font-lock-warning-face nil :foreground "red" :weight 'bold :background "yellow")
+  (add-hook 'mu4e-compose-mode-hook
+            (defun mu4e-highlight-words ()
+              "Flag attachment keywords"
+              (font-lock-add-keywords nil
+                                      '(("\\(urgent\\|myname\\|reply\\)" 1 font-lock-warning-face t)))))
+
+  ;; remove automatic wrapping of lines
+  (add-hook 'mu4e-compose-mode-hook 'turn-off-auto-fill)
+
+  ;;------------------ headers
+
+  ;; the headers to show in the headers list -- a pair of a field
+  ;; and its width, with `nil' meaning 'unlimited'
+  ;; (better only use that for the last field.
+  ;; These are the defaults:
+  (setq mu4e-headers-fields
+        '( (:human-date          .  11)    ;; date, human-date
+           (:flags         .   6)
+           (:from          .  22) ;; from , to, from-or-to
+           (:to            .  22)
+                                        ;(:mailing-list . 10)
+           (:thread-subject       .  nil))) ;; subject, thread-subject
+
+  ;; date format
+  (setq mu4e-headers-date-format "%d-%m-%Y")
+  (setq mu4e-headers-time-format "[%H:%M]")
+
+  ;;thread options
+  (setq
+   ;; thread prefix marks
+   mu4e-headers-has-child-prefix '("."  . "◼ ")
+   mu4e-headers-default-prefix '(" "  . "│ ")
+   )
+
+  ;; show full addresses in view message (instead of just names)
+  ;; toggle per name with M-RET
+  ;; (setq mu4e-view-show-addresses 't)
+
+  ;; ---- actions
+
+  ;; add view in browser for html messages
+  (add-to-list 'mu4e-view-actions
+               '("ViewInBrowser" . mu4e-action-view-in-browser) t)
+
+  ;; search for sender
+  (defun search-for-sender (msg)
+    "Search for messages sent by the sender of the message at point."
+    (mu4e-headers-search
+     (concat "from:" (cdar (mu4e-message-field msg :from)))))
+  ;; define 'x' as the shortcut
+  (add-to-list 'mu4e-view-actions
+               '("xsearch for sender" . search-for-sender) t)
+
+  ;; overwrite save attachment to propose making non-existing directories first
+  ;; also allows using directory as input
+  (defun mu4e-view-save-attachment-single (&optional msg attnum)
+    "Save attachment number ATTNUM from MSG.
+If MSG is nil use the message returned by `message-at-point'.
+If ATTNUM is nil ask for the attachment number."
+    (interactive)
+    (let* ((msg (or msg (mu4e-message-at-point)))
+           (attnum (or attnum
+                       (mu4e~view-get-attach-num "Attachment to save" msg)))
+           (att (mu4e~view-get-attach msg attnum))
+           (fname  (plist-get att :name))
+           (mtype  (plist-get att :mime-type))
+           (path (concat
+                  (mu4e~get-attachment-dir fname mtype) "/"))
+           (index (plist-get att :index))
+           (retry t) (fpath))
+      ;;path is attachment dir (~)
+      (while retry
+        (setq fpath (mu4e~view-request-attachment-path fname path))
+        (setq path2 (file-name-directory fpath))
+        (setq retry
+              (and (not (file-exists-p path2))
+                   (not (y-or-n-p (mu4e-format "Create directory '%s'?" path2))))))
+      (make-directory path2 t)
+      ;;if input is a directory, append fname
+      (if (file-directory-p (substitute-in-file-name fpath))
+          (setq fpath (concat fpath "/" fname)))
+      ;;should we overwrite?
+      (while retry
+        (setq retry
+              (and (file-exists-p fpath)
+                   (not (y-or-n-p (mu4e-format "Overwrite '%s'?" fpath))))))
+      (mu4e~proc-extract
+       'save (mu4e-message-field msg :docid)
+       index mu4e-decryption-policy fpath)))
+
+  ;; overwrite to save all attachments with no confirmation
+  (defun mu4e-view-save-attachment-multi2 (&optional msg)
+    "Offer to save multiple email attachments from the current message.
+Default is to save all messages, [1..n], where n is the number of
+attachments.  You can type multiple values separated by space, e.g.
+  1 3-6 8
+will save attachments 1,3,4,5,6 and 8.
+Furthermore, there is a shortcut \"a\" which so means all
+attachments, but as this is the default, you may not need it."
+    (interactive)
+    (let* ((msg (or msg (mu4e-message-at-point)))
+           (count (hash-table-count mu4e~view-attach-map))
+           (attachnums (mu4e-split-ranges-to-numbers "a" count)))
+      (let* ((path (concat (mu4e~get-attachment-dir) "/"))
+             (attachdir (mu4e~view-request-attachments-dir path)))
+        (dolist (num attachnums)
+          (let* ((att (mu4e~view-get-attach msg num))
+                 (fname  (plist-get att :name))
+                 (index (plist-get att :index))
+                 (retry t)
+                 fpath)
+            (while retry
+              (setq fpath (expand-file-name (concat attachdir fname) path))
+              (setq retry
+                    (and (file-exists-p fpath)
+                         (not (y-or-n-p
+                               (mu4e-format "Overwrite '%s'?" fpath))))))
+            (mu4e~proc-extract
+             'save (mu4e-message-field msg :docid)
+             index mu4e-decryption-policy fpath))))
+      ))
+  (define-key mu4e-view-mode-map (kbd "s") 'mu4e-view-save-attachment-multi2)
+
+  ;; overwrite fetch URL to propose making non-existing directories first and choosing the filename
+  (defun mu4e-view-fetch-url (&optional multi)
+    "Offer to fetch (download) urls(s). If MULTI (prefix-argument) is nil,
+download a single one, otherwise, offer to fetch a range of
+URLs. The urls are fetched to `mu4e-attachment-dir'."
+    (interactive "P")
+    (mu4e~view-handle-urls "URL to fetch" multi
+                           (lambda (url)
+                             (setq retry t)
+                             (while retry
+                               (setq fname (file-name-nondirectory url))
+                               (setq path (concat
+                                           (mu4e~get-attachment-dir fname) "/"))
+                               (setq fpath (mu4e~view-request-attachment-path fname path))
+                               (setq path2 (file-name-directory fpath))
+                               (setq retry
+                                     (and (not (file-exists-p path2))
+                                          (not (y-or-n-p (mu4e-format "Create directory '%s'?" path2))))))
+                             (make-directory path2 t)
+                             (while retry
+                               (setq retry
+                                     (and (file-exists-p fpath)
+                                          (not (y-or-n-p (mu4e-format "Overwrite '%s'?" fpath))))))
+                             (url-copy-file url fpath)
+                             (mu4e-message "Fetched %s -> %s" url fpath))
+                           ))
+
+  ;; remove all attachments from email. This works also for Gmail, with the tweak that the message is moved around so as to force an update on the IMAP server
+  ;; This adds a new "attachment action" in Mu4e. When viewing an email, press A, then R to select the action defined above, then enter the number of the attachment. The action will ask you for confirmation before deleting the attachment. The header listing the attachments is not updates but when you leave the email and reopen it, the attachment is gone. By default remove all attachments (still asks for att. number through...)
+  ;;also check mu4e-detach
+  (defun my-remove-attachment (msg num) 
+    "Remove attachment."
+
+    (let* ((x (mu4e~view-construct-attachments-header msg));; Populate attachment map
+           (count (hash-table-count mu4e~view-attach-map));; Count the attachments
+           (attachnums (mu4e-split-ranges-to-numbers "a" count));; A list of numbers for all attachments
+           )
+      (let (fnamelist '())
+        ;; Save all attachments
+        (dolist (num attachnums)
+          (let* ((att (mu4e~view-get-attach msg num))
+                 (fname (plist-get att :name)))
+            (add-to-list 'fnamelist fname)))
+
+        (let* ((path (mu4e-msg-field msg :path))
+               (disc-txt (format "Removed attachments:\n- %s\n"
+                                 (s-join "\n- " fnamelist)))
+               (disc-txt-fpath "/tmp/disclaimer.txt")
+               (cmd (format "altermime --input=%s --removeall --disclaimer='%s'" path disc-txt-fpath)))
+          (with-temp-file disc-txt-fpath (insert disc-txt))
+          (shell-command cmd)
+          (message cmd))
+
+        ))
+    ;; move mail around so it gets updated in IMAP
+    (let* ((oldmaildir (mu4e-message-field msg :maildir)))
+      (mu4e~proc-move (mu4e-message-field msg :message-id) "/gmailvl/[Gmail].Drafts/")
+      (mu4e~proc-move (mu4e-message-field msg :message-id) oldmaildir))
+    )
+  (add-to-list 'mu4e-view-attachment-actions
+               '("remove-attachments" . my-remove-attachment))
+
+  ;; add action to show the local filename of the message
+  (defun my-show-filename (msg)
+    (kill-new (mu4e-message-field msg :path))
+    )
+  (add-to-list 'mu4e-view-actions
+               '("filename in kill-ring" . my-show-filename))
+  (add-to-list 'mu4e-headers-actions
+               '("filename in kill-ring" . my-show-filename))
+
+  ;;------------------ trash
+
+  ;;somehow trash flag don't seem to work for gmail, it keeps showing
+  ;;in all-mail. Just move them to Trash, gmail seems to take care of the
+  ;;trashed flag just fine
+  (add-to-list 'mu4e-marks
+               '(archive
+                 :char       ("D" . "❌❌")
+                 :prompt     "Delete"
+                                        ;:show-target (lambda (target) "trash!")
+                 :dyn-target (lambda (target msg) (mu4e-get-trash-folder msg))
+                 :action      (lambda (docid msg target)
+                                ;; must come before proc-move since retag runs
+                                ;; 'sed' on the file
+                                (mu4e~proc-move docid (mu4e~mark-check-target target)))))
+  (mu4e~headers-defun-mark-for archive)
+  (define-key mu4e-headers-mode-map (kbd "D") 'mu4e-headers-mark-for-archive)
+  ;;also overwrite other existing marks
+  (add-to-list 'mu4e-marks
+               '(archive
+                 :char       ("d" . "❌❌")
+                 :prompt     "delete"
+                                        ;:show-target (lambda (target) "trash!")
+                 :dyn-target (lambda (target msg) (mu4e-get-trash-folder msg))
+                 :action      (lambda (docid msg target)
+                                ;; must come before proc-move since retag runs
+                                ;; 'sed' on the file
+                                (mu4e~proc-move docid (mu4e~mark-check-target target)))))
+  (mu4e~headers-defun-mark-for archive)
+  (define-key mu4e-headers-mode-map (kbd "d") 'mu4e-headers-mark-for-archive)
+
+  ;;------------------ help
+
+  ;;help
+  (defun show-mu4e-main-help ()
+    (interactive)
+    (message-box "
+MU4E
+----
+?:?
+"))
+
+  (defun show-mu4e-view-help ()
+    (interactive)
+    (message-box "
+MU4E-view
+---------
+
+R,F,C: reply, forward, compose
+a: message actions
+A: attachment actions
+
+g: visit URLs
+f: fetch URLs
+e: save (extract) attachment
+s: save all attachments
+
+C-cr: capture reply to
+C-ct: capture todo-mail
+"))
+
+  (defun show-mu4e-headers-help ()
+    (interactive)
+    (message-box "
+MU4E-headers
+------------
+
+P:\t threading on/off
+R,F,C: reply, forward, compose
+E:\t edit (drafts)
+
+d/=:  trash/untrash
+DEL,D: deletion
+m:\t move
+r:\t refile
+u/U: unmark (all) message(s)
+t,T: mark (sub)thread
+Flags: +/- importance
+       ?,!: unread/read
+x:\t execute actions
+
+/,M-arrows: narrow-down and navigate queries
+
+C-cr: capture reply to
+C-ct: capture todo-mail
+"))
+
+  (defun show-mu4e-compose-help ()
+    (interactive)
+    (message-box "
+MU4E-compose
+------------
+C-c C-a: attach
+C-c C-c: send
+C-c C-k: cancel
+C-x C-s: save in drafts
+
+TAB: cycle through email addresses suggestions
+
+C-ct: capture todo-mail
+"))
+
+  ;;shortcut
+
+  ;;====================== ORG CAPTURE =============================
+  ;;https://orgmode.org/manual/Template-elements.html#Template-elements
+
+
+  ;;store org-mode links to messages
+  (require 'org-mu4e)
+  ;;store link to message if in header view, not to header query. When you are in Headers view, M-x org-store-link links to the query if org-mu4e-link-query-in-headers-mode is non-nil, and to the particular message otherwise (which is the default).
+  (setq org-mu4e-link-query-in-headers-mode nil)
+
+  (setq org-capture-templates
+        '(("t" "Todo-mail" entry (file+headline "~/workflow.org" "Captured todo-mails")
+           "\n\n* TODO %:subject %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+          ("r" "Reply to" entry (file+headline "~/workflow.org" "Reply to")
+           "\n\n* TODO Reply to %:fromname on %:subject %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
+          ("b" "Bookmark" entry (file+headline "~/bookmarks.org" "Captured")
+           "\n\n* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n"))
+        )
+  ;; https://orgmode.org/manual/Template-expansion.html
+
+  ;; function to capture a bookmark
+  (defun org-capture-bookmark ()
+    (interactive)
+    "Capture a bookmark item"
+    (org-capture nil "b"))
+
+  ;; function to capture a mail todo
+  (defun org-capture-todomail ()
+    (interactive)
+    "Capture a todo-mail item"
+    (org-capture nil "t"))
+
+  ;; function to capture a mail todo
+  (defun org-capture-replymail ()
+    (interactive)
+    "Capture a todo-mail item"
+    (org-capture nil "r"))
+
+  ;; bind
+  (define-key global-map "\C-cc" 'org-capture)
   )
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -463,7 +957,7 @@ you should place your code here."
  '(org-support-shift-select (quote always))
  '(package-selected-packages
    (quote
-    (ghub csv-mode company-auctex auctex-latexmk auctex xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help color-theme-solarized color-theme floobits zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme yaml-mode omnisharp glsl-mode shut-up csharp-mode shader-mode imenu-list flyspell-correct-helm flyspell-correct auto-dictionary web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data web-beautify livid-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js-doc company-tern tern coffee-mode ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd smeargle orgit mmm-mode markdown-toc markdown-mode magit-gitflow helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor company-statistics company-anaconda company auto-yasnippet yasnippet ac-ispell auto-complete yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (mu4e-maildirs-extension mu4e-alert ht alert log4e gntp lua-mode ghub csv-mode company-auctex auctex-latexmk auctex xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help color-theme-solarized color-theme floobits zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme yaml-mode omnisharp glsl-mode shut-up csharp-mode shader-mode imenu-list flyspell-correct-helm flyspell-correct auto-dictionary web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data web-beautify livid-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js-doc company-tern tern coffee-mode ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd smeargle orgit mmm-mode markdown-toc markdown-mode magit-gitflow helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor company-statistics company-anaconda company auto-yasnippet yasnippet ac-ispell auto-complete yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -487,11 +981,11 @@ This function is called at the very end of Spacemacs initialization."
  '(org-support-shift-select (quote always))
  '(package-selected-packages
    (quote
-    (mu4e-maildirs-extension mu4e-alert ht alert log4e gntp helm-mu ghub csv-mode company-auctex auctex-latexmk auctex xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help color-theme-solarized color-theme floobits zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme yaml-mode omnisharp glsl-mode shut-up csharp-mode shader-mode imenu-list flyspell-correct-helm flyspell-correct auto-dictionary web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data web-beautify livid-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js-doc company-tern tern coffee-mode ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd smeargle orgit mmm-mode markdown-toc markdown-mode magit-gitflow helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor company-statistics company-anaconda company auto-yasnippet yasnippet ac-ispell auto-complete yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (org-projectile org-category-capture org-present org-pomodoro org-mime org-download org-brain gnuplot evil-org dockerfile-mode docker tablist docker-tramp mu4e-maildirs-extension mu4e-alert ht alert log4e gntp lua-mode ghub csv-mode company-auctex auctex-latexmk auctex xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help color-theme-solarized color-theme floobits zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme yaml-mode omnisharp glsl-mode shut-up csharp-mode shader-mode imenu-list flyspell-correct-helm flyspell-correct auto-dictionary web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data web-beautify livid-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js-doc company-tern tern coffee-mode ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd smeargle orgit mmm-mode markdown-toc markdown-mode magit-gitflow helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor company-statistics company-anaconda company auto-yasnippet yasnippet ac-ispell auto-complete yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:foreground "#DCDCCC" :background "#3F3F3F")))))
+ '(default ((t (:foreground "#DCDCCC" :background "#3F3F3F" :family "Source Code Pro" :foundry "ADBO" :slant normal :weight normal :height 127 :width normal)))))
 )
