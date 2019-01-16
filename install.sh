@@ -6,7 +6,8 @@
 
 sudo apt-get install -y git zsh tree \
      fonts-powerline xautolock alsa-base \
-     alsa-utils xbacklight xclip nodejs
+     alsa-utils xbacklight xclip nodejs \
+     gimp openjdk-8-jdk openjdk-8-jre
 
 #####################################
 #          Dropbox
