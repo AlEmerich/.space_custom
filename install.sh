@@ -107,3 +107,10 @@ sudo mkdir -p /lib/terminfo/x
 sudo ln -s /usr/local/share/terminfo/x/xterm-termite /lib/terminfo/x/xterm-termite 
 
 ln -s $PWD/termite ~/.config/termite
+
+#####################################
+#           Scripts
+#####################################
+
+ln -s script/dual_hdmi $HOME/.local/bin/dual_hdmi
+ln -s script/single_screen $HOME/.local/bin/single_screen
