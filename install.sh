@@ -112,5 +112,5 @@ ln -s $PWD/termite ~/.config/termite
 #           Scripts
 #####################################
 
-ln -s script/dual_hdmi $HOME/.local/bin/dual_hdmi
-ln -s script/single_screen $HOME/.local/bin/single_screen
+ln -s $PWD/script/dual_hdmi $HOME/.local/bin/dual_hdmi
+ln -s $PWD/script/single_screen $HOME/.local/bin/single_screen
