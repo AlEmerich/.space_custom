@@ -7,7 +7,8 @@
 sudo apt-get install -y git zsh tree \
      fonts-powerline xautolock alsa-base \
      alsa-utils xbacklight xclip nodejs \
-     gimp openjdk-8-jdk openjdk-8-jre
+     gimp openjdk-8-jdk openjdk-8-jre \
+     wicd-curses
 
 #####################################
 #          Dropbox
@@ -55,6 +56,7 @@ ln -s $PWD/systemd/emacs.service ~/.config/systemd/user/emacs.service
 #           Spacemacs
 #####################################
 
+rm -rf ~/.emacs.d
 ln -s $PWD/spacemacs/.spacemacs ~/.spacemacs
 ln -s $PWD/spacemacs/.emacs.d ~/.emacs.d
 
