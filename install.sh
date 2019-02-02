@@ -34,12 +34,12 @@ sudo pip install virtualenv virtualenvwrapper
 git clone --recursive git@github.com:AlEmerich/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
 chsh -s /bin/zsh
 
-ln -s $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin
-ln -s $HOME/.zprezto/runcoms/zlogout $HOME/.zlogout
-ln -s $HOME/.zprezto/runcoms/zpreztorc $HOME/.zpreztorc
-ln -s $HOME/.zprezto/runcoms/zprofile $HOME/.zprofile
-ln -s $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv
-ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc 
+ln -s $PWD/zsh/zlogin $HOME/.zlogin
+ln -s $PWD/zsh/zlogout $HOME/.zlogout
+ln -s $PWD/zsh/zpreztorc $HOME/.zpreztorc
+ln -s $PWD/zsh/zprofile $HOME/.zprofile
+ln -s $PWD/zsh/zshenv $HOME/.zshenv
+ln -s $PWD/zsh/zshrc $HOME/.zshrc 
 
 #####################################
 #           Emacs
