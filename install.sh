@@ -7,8 +7,8 @@
 sudo apt-get install -y git zsh tree \
      fonts-powerline xautolock alsa-base \
      alsa-utils xbacklight xclip nodejs \
-     gimp openjdk-8-jdk openjdk-8-jre \
-     wicd-curses
+     npm openjdk-8-jdk openjdk-8-jre \
+     wicd-curses gimp dmenu
 
 #####################################
 #          Dropbox
@@ -17,8 +17,6 @@ sudo apt-get install -y git zsh tree \
 wget https://linux.dropbox.com/packages/ubuntu/dropbox_2015.10.28_amd64.deb
 sudo dpkg -i dropbox_2015.10.28_amd64.deb
 sudo apt-get install -f
-
-dropbox start
 
 #####################################
 #          Virtualenv
@@ -49,9 +47,6 @@ sudo add-apt-repository ppa:kelleyk/emacs
 sudo apt-get update
 sudo apt-get install emacs26
 
-mkdir ~/.config/systemd/user
-ln -s $PWD/systemd/emacs.service ~/.config/systemd/user/emacs.service
-
 #####################################
 #           Spacemacs
 #####################################
@@ -78,8 +73,9 @@ sudo apt-get install -y i3lock scrot \
 #          Keepass
 ####################################
 sudo apt-get install keepassx
-npm install keepass-dmenu
+sudo npm install -g keepass-dmenu
 
+mkdir ~/.local/bin/
 export KPD_SCRIPT=~/.local/bin/local_keepass_dmenu.sh
 touch $KPD_SCRIPT
 read -p "Path of Keepass databse: " path
@@ -111,8 +107,22 @@ sudo ln -s /usr/local/share/terminfo/x/xterm-termite /lib/terminfo/x/xterm-termi
 ln -s $PWD/termite ~/.config/termite
 
 #####################################
+#           Systemd
+#####################################
+
+mkdir ~/.config/systemd/user
+ln -s $PWD/systemd/emacs.service ~/.config/systemd/user/emacs.service
+ln -s $PWD/systemd/dropbox.service ~/.config/systemd/user/dropbox.service
+
+systemctl --user start emacs
+systemctl --user enable emacs
+systemctl --user start dropbox
+systemctl --user enable dropbox
+
+#####################################
 #           Scripts
 #####################################
 
 ln -s $PWD/script/dual_hdmi $HOME/.local/bin/dual_hdmi
 ln -s $PWD/script/single_screen $HOME/.local/bin/single_screen
+ln -s $PWD/awesome-copycats/fuzzy_lock.sh $HOME/.local/bin/fuzzy_lock.sh
