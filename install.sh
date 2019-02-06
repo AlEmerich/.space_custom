@@ -9,6 +9,7 @@ sudo apt-get install -y git zsh tree \
      alsa-utils xbacklight xclip nodejs \
      npm openjdk-8-jdk openjdk-8-jre \
      wicd-curses gimp dmenu
+sudo pip install jupyter
 
 #####################################
 #          Dropbox

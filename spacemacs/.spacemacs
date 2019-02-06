@@ -122,7 +122,7 @@ values."
    ;; to create your own spaceline theme. Value can be a symbol or list with\
    ;; additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
-   dotspacemacs-mode-line-theme '(all-the-icons)
+   dotspacemacs-mode-line-theme '(vim-powerline)
 
    ;; iffeR non nil ELPA repositories are contacted via HTTPS whenever it's
    ;; possible. Set it to nil if you have no way to use HTTPS in your
@@ -188,7 +188,7 @@ values."
                                :size 16
                                :weight normal
                                :width normal
-                               :powerline-scale 2
+                               :powerline-scale 1.5
                                )
    ;; the leader key
    dotspacemacs-leader-key "SPC"
@@ -361,6 +361,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (add-to-list 'package-pinned-packages '(spaceline-all-the-icons . "melpa-stable"))
   (add-to-list 'package-pinned-packages '(spaceline-ml-all-the-icons . "melpa-stable"))
   (add-to-list 'package-pinned-packages '(all-the-icons . "melpa-stable"))
+
+  (spacemacs/set-default-font dotspacemacs-default-font)
   )
 
 (defun dotspacemacs/user-config ()
