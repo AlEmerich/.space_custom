@@ -63,7 +63,7 @@ ln -s $PWD/spacemacs/.emacs.d ~/.emacs.d
 
 # Base
 sudo apt-get install -y awesome
-git clone git@github.com:AlEmerich/awesome-copycats.git
+git clone  --recursive git@github.com:AlEmerich/awesome-copycats.git
 ln -s $PWD/awesome-copycats ~/.config/awesome
 sudo ln -s $PWD/xsessions/awesome.desktop /usr/share/xsessions/awesome.desktop
 
