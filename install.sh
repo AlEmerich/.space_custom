@@ -89,7 +89,7 @@ echo "keepass-dmenu --database $path --password $password" >> $KPD_SCRIPT
 
 # Dependencies
 sudo apt-get install -y g++ libgtk-3-dev gtk-doc-tools \
-     gnutls-bin valac intltool libpcre2-dev libglib3.0-il-dev \
+     gnutls-bin valac intltool libpcre2-dev libglib3.0-cil-dev \
      libgnutls28-dev libgirepository1.0-dev libxml2-utils \
      gperf build-essential
 
