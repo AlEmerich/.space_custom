@@ -8,7 +8,8 @@ sudo apt-get install -y git zsh tree \
      fonts-powerline xautolock alsa-base \
      alsa-utils xbacklight xclip nodejs \
      npm openjdk-8-jdk openjdk-8-jre \
-     wicd-curses gimp dmenu
+     wicd-curses gimp dmenu python-pip
+     python3-pip
 sudo pip install jupyter
 
 #####################################
@@ -69,6 +70,8 @@ sudo ln -s $PWD/xsessions/awesome.desktop /usr/share/xsessions/awesome.desktop
 # Locker
 sudo apt-get install -y i3lock scrot \
      imagemagick x11-xserver-utils
+     
+ # Todo install font-awesome.ttf
 
 #####################################
 #          Keepass
@@ -96,7 +99,7 @@ sudo apt-get install -y g++ libgtk-3-dev gtk-doc-tools \
 # vte-ng
 git clone https://github.com/thestinger/vte-ng.git
 export LIBRARY_PATH="/usr/include/gtk-3.0:$LIBRARY_PATH"
-cd vte-ng && ./autogen.sh && make && sudo make install.sh
+cd vte-ng && ./autogen.sh && make && sudo make install
 
 # termite
 git clone --recursive https://github.com/thestinger/termite.git
@@ -111,14 +114,15 @@ ln -s $PWD/termite ~/.config/termite
 #           Systemd
 #####################################
 
+mkdir ~/.config/systemd
 mkdir ~/.config/systemd/user
 ln -s $PWD/systemd/emacs.service ~/.config/systemd/user/emacs.service
 ln -s $PWD/systemd/dropbox.service ~/.config/systemd/user/dropbox.service
 
-systemctl --user start emacs
 systemctl --user enable emacs
-systemctl --user start dropbox
+systemctl --user start emacs
 systemctl --user enable dropbox
+systemctl --user start dropbox
 
 #####################################
 #           Scripts
@@ -127,3 +131,5 @@ systemctl --user enable dropbox
 ln -s $PWD/script/dual_hdmi $HOME/.local/bin/dual_hdmi
 ln -s $PWD/script/single_screen $HOME/.local/bin/single_screen
 ln -s $PWD/awesome-copycats/fuzzy_lock.sh $HOME/.local/bin/fuzzy_lock.sh
+
+# TODO Install Source Code Pro
