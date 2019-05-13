@@ -9,7 +9,7 @@ sudo apt-get install -y git zsh tree \
      alsa-utils xbacklight xclip nodejs \
      npm openjdk-8-jdk openjdk-8-jre \
      wicd-curses gimp dmenu python-pip
-     python3-pip unclutter
+     python3-pip unclutter xsel
 sudo pip install jupyter
 
 #####################################
