@@ -9,7 +9,7 @@ sudo apt-get install -y git zsh tree \
      alsa-utils xbacklight xclip nodejs \
      npm openjdk-8-jdk openjdk-8-jre \
      wicd-curses gimp dmenu python-pip
-     python3-pip
+     python3-pip unclutter
 sudo pip install jupyter
 
 #####################################
@@ -66,6 +66,10 @@ sudo apt-get install -y awesome
 git clone  --recursive git@github.com:AlEmerich/awesome-copycats.git
 ln -s $PWD/awesome-copycats ~/.config/awesome
 sudo ln -s $PWD/xsessions/awesome.desktop /usr/share/xsessions/awesome.desktop
+
+#icon 
+git clone https://github.com/horst3180/arc-icon-theme
+cd arc-icon-theme && ./autogen.sh --prefix=/usr && sudo make install
 
 # Locker
 sudo apt-get install -y i3lock scrot \
