@@ -17,5 +17,5 @@ export SHELL="/bin/zsh"
 export WORKON_HOME=$HOME/.virtualenvs
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export GRAILS_HOME=$HOME/.grails/wrapper/2.5.6/grails-2.5.6
+export GRAILS_HOME=$HOME/tools/grails-2.5.6
 export PATH=$GRAILS_HOME/bin:$PATH
