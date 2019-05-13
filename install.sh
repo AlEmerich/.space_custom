@@ -8,8 +8,9 @@ sudo apt-get install -y git zsh tree \
      fonts-powerline xautolock alsa-base \
      alsa-utils xbacklight xclip nodejs \
      npm openjdk-8-jdk openjdk-8-jre \
-     wicd-curses gimp dmenu python-pip
-     python3-pip unclutter xsel
+     wicd-curses gimp dmenu python-pip \
+     python3-pip unclutter xsel compton \
+     compton-conf
 sudo pip install jupyter
 
 #####################################
@@ -75,7 +76,22 @@ cd arc-icon-theme && ./autogen.sh --prefix=/usr && sudo make install
 sudo apt-get install -y i3lock scrot \
      imagemagick x11-xserver-utils
      
- # Todo install font-awesome.ttf
+#####################################
+#         FONTS
+##################################### 
+FONT_HOME = ~/.local/share/fonts
+
+wget http://pavelmakhov.com/awesome-wm-widgets/assets/fonts/awesomewm-font.ttf 
+sudo cp awesomewm-font.ttf $FONT_HOME
+fc-cache -f -v
+
+mkdir -p "$FONT_HOME/adobe-fonts/source_code_pro"
+(git clone \
+   --branch release \
+   --depth 1 \
+   'https://github.com/adobe-fonts/source-code-pro.git' \
+   "$FONT_HOME/adobe-fonts/source-code-pro" && \
+   fc-cache -f -v "$FONT_HOME/adobe-fonts/source-code-pro")
 
 #####################################
 #          Keepass
@@ -112,7 +128,7 @@ sudo ldconfig
 sudo mkdir -p /lib/terminfo/x
 sudo ln -s /usr/local/share/terminfo/x/xterm-termite /lib/terminfo/x/xterm-termite 
 
-ln -s $PWD/termite ~/.config/termite
+ln -s $PWD/termite_conf/ ~/.config/termite
 
 #####################################
 #           Systemd
@@ -135,5 +151,3 @@ systemctl --user start dropbox
 ln -s $PWD/script/dual_hdmi $HOME/.local/bin/dual_hdmi
 ln -s $PWD/script/single_screen $HOME/.local/bin/single_screen
 ln -s $PWD/awesome-copycats/fuzzy_lock.sh $HOME/.local/bin/fuzzy_lock.sh
-
-# TODO Install Source Code Pro
