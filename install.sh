@@ -11,7 +11,9 @@ sudo apt-get install -y git zsh tree \
      wicd-curses gimp dmenu python-pip \
      python3-pip unclutter xsel compton \
      compton-conf
-sudo pip install jupyter
+
+sudo pip install jupyter 'python-language-server[all]' \
+     importmagic epc
 
 #####################################
 #          Dropbox
