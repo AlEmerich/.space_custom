@@ -1,0 +1,159 @@
+# Conky settings #
+background no
+cpu_avg_samples 2
+update_interval 1
+double_buffer yes
+no_buffers yes
+imlib_cache_size 10
+
+# Window specifications #
+gap_x 50
+gap_y 70
+minimum_size 350
+alignment top_left
+use_spacer none
+own_window yes
+own_window_class Conky
+own_window_type dock
+own_window_transparent no
+own_window_argb_visual yes
+own_window_argb_value 255
+own_window_colour 3f3f3f
+own_window_hints undecorated,sticky,skip_taskbar,skip_pager,below
+#own_window_type normal
+#own_window_transparent no
+#own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+#own_window_argb_visual yes
+#own_window_argb_value 0
+border_inner_margin 20
+border_outer_margin 20
+
+# Graphics settings #
+draw_shades no
+default_shade_color AAAAAA
+draw_outline no
+default_outline_color 222222
+draw_borders no
+draw_graph_borders no
+default_graph_size 26 80
+show_graph_scale no
+show_graph_range no
+
+# Text settings #
+use_xft yes
+xftalpha 0
+xftfont Droid Sans:size=8
+text_buffer_size 256
+override_utf8_locale yes
+
+# Useful shortenings #
+short_units yes
+pad_percents  2
+top_name_width 30
+
+# Color scheme #
+default_color FFFFFF
+color1 FFFFFF
+color2 FFFFFF
+color3 FFFFFF
+color4 FFFFFF
+color5 DCDCDC
+color6 FFFFFF
+color7 FFFFFF
+color8 CC9900
+
+TEXT
+
+${voffset -50}
+${font Product Sans:weight=Bold:size=40}${color0}\
+${time %H:%M}
+${voffset -90}
+${font Product Sans:weight=Bold:size=20}${color0}\
+${time %A}
+${font Product Sans:weight=Bold:size=15}${color0}\
+${time %d %B, %Y}
+
+${font Product Sans:weight=Bold:size=12}${color5}\
+${color8}System ${hr 2}$color
+${font Product Sans:weight=Bold:size=12}${color0}\
+${voffset -10}
+${execi 999999 lsb_release -ds} ${machine}
+Kernel: ${kernel}
+
+${font Product Sans:weight=Bold:size=12}${color5}\
+${color8}Vidéo ${hr 2}$color
+${font Product Sans:weight=Bold:size=8}${color0}\
+GPU Frequency $alignr ${nvidia gpufreq} Mhz
+Memory Frequency $alignr ${nvidia memfreq} Mhz
+Temperature GPU $alignr ${nvidia temp} °C
+
+${font Product Sans:weight=Bold:size=8}${color0}\
+\
+# Cpu, memory and disk IO
+\
+${voffset -20}
+${font Product Sans:weight=Bold:size=12}${color5}\
+${color8}CPU ${hr 2}$color
+${font Product Sans:weight=Bold:size=8}${color0}\
+${voffset -20}
+Temperature CPU $alignr ${hwmon 0 temp 1} °C
+Fan speed $alignr ${hwmon 2 fan 1} T/min
+${diskiograph 26,350 FFFFFF FFFFFF -l}
+${voffset -31}
+${hr 2}
+Disk I/O:${alignr 0}${diskio /dev/sda2}
+
+${cpugraph 26,350 FFFFFF FFFFFF -l}
+${voffset -31}
+${hr 2}
+Cpu:${alignr 0}${cpu}%
+
+${memgraph 26,350 FFFFFF FFFFFF -l}
+${voffset -31}
+${hr 2}
+Mem:${alignr 0}${memperc}%
+${alignr 0}Max: ${memmax}
+
+${swapbar 5,350}
+Swap:${alignr 0}${swapperc}%
+${alignr 0}Max: ${swapmax}
+
+# Network
+${font Product Sans:weight=Bold:size=12}${color5}\
+${color8}Network ${hr 2}$color
+${font Product Sans:weight=Bold:size=8}${color0}\
+${voffset -30}
+${if_existing /proc/net/route enp4s0}
+${upspeedgraph enp4s0 26,160 FFFFFF FFFFFF}${alignr 0}${downspeedgraph enp4s0 26,160 FFFFFF FFFFFF}  
+${color5}Up: ${color2}${upspeed enp4s0}${color5}${alignr 0}Down: ${color2}${downspeed enp4s0}
+${color5}Sent: ${color2}${totalup enp4s0}${color5}${alignr 0}Received: ${color2}${totaldown enp4s0}
+${endif}
+${if_existing /proc/net/route wlp3s0}
+${upspeedgraph wlp3s0 26,140 FFFFFF FFFFFF}${goto 250}${downspeedgraph wlp3s0 26,140 FFFFFF FFFFFF}
+${color5}Up: ${color2}${upspeed wlp3s0}${color5}${goto 250}Down: ${color2}${downspeed wlp3s0}
+${color5}Sent: ${color2}${totalup wlp3s0}${color5}${goto 250}Received: ${color2}${totaldown wlp3s0}
+${endif}
+
+# Proceses
+${voffset -30}
+${font Product Sans:weight=Bold:size=12}${color5}\
+${color8}Process ${hr 2}$color
+${font Product Sans:weight=Bold:size=8}${color0}\
+${color1}Proc${color}${alignr 0}${color1}${color1}Mem${color}
+${voffset -20}
+${hr 2}
+${color2}${top_mem name 1}${color}${alignr 0}${top_mem mem_res 1}
+${color2}${top_mem name 2}${color}${alignr 0}${top_mem mem_res 2}
+${color2}${top_mem name 3}${color}${alignr 0}${top_mem mem_res 3}
+${color2}${top_mem name 4}${color}${alignr 0}${top_mem mem_res 4}
+${color2}${top_mem name 5}${color}${alignr 0}${top_mem mem_res 5}
+
+${color1}Proc${color}${alignr 0}${color1}Cpu %${color}
+${voffset -20}
+${hr 2}
+${color2}${top_mem name 1}${color}${alignr 0}${top cpu 1} %
+${color2}${top_mem name 2}${color}${alignr 0}${top cpu 2} %
+${color2}${top_mem name 3}${color}${alignr 0}${top cpu 3} %
+${color2}${top_mem name 4}${color}${alignr 0}${top cpu 4} %
+${color2}${top_mem name 5}${color}${alignr 0}${top cpu 5} %
+${voffset -50}
