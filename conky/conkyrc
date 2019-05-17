@@ -85,7 +85,7 @@ ${voffset -10}
 ${execi 999999 lsb_release -ds} ${machine}
 Kernel: ${kernel}
 ${font Product Sans:weight=Bold:size=8}${color0}\
-Storage: ${alignr 200} ${fs_bar}
+Storage: ${goto 210} ${fs_bar}
 ${alignr 0}Used: ${fs_used} Max: ${fs_size}
 \
 ${font Product Sans:weight=Bold:size=12}${color5}\
@@ -106,26 +106,20 @@ ${font Product Sans:weight=Bold:size=8}${color0}\
 ${voffset -20}
 Temperature CPU $alignr ${hwmon 0 temp 1} °C
 Fan speed $alignr ${hwmon 2 fan 1} T/min
-${diskiograph 26,350 FFFFFF FFFFFF -l}
-${voffset -31}
-${goto 200}${hr 2}
-${voffset -28}
+${alignr 0}${diskiograph 26,190 333333 FFFFFF -l}
+${voffset -32}
 Disk I/O: ${alignr 200}${diskio /dev/sda2}
 
-${cpugraph 26,350 333333 FFFFFF -l}
-${voffset -31}
-${goto 200}${hr 2}
-${voffset -28}
+${alignr 0}${cpugraph 26,190 333333 FFFFFF -l}
+${voffset -32}
 Cpu: ${alignr 200}${cpu}%
 
-${memgraph 26,350 333333 FFFFFF -l}
-${voffset -31}
-${goto 200}${hr 2}
-${voffset -28}
+${alignr 0}${memgraph 26,190 333333 FFFFFF -l}
+${voffset -32}
 Mem:${alignr 200}${memperc}%
 ${alignr 0}Max: ${memmax}
 
-${goto 200}${swapbar}
+${goto 210}${swapbar}
 ${voffset -28}
 Swap:${alignr 200}${swapperc}%
 ${alignr 0}Max: ${swapmax}
@@ -137,12 +131,12 @@ ${color8}Network ${hr 2}$color
 ${font Product Sans:weight=Bold:size=8}${color0}\
 ${voffset -30}
 ${if_existing /proc/net/route enp4s0}
-${upspeedgraph enp4s0 26,160 FFFFFF FFFFFF}${alignr 0}${downspeedgraph enp4s0 26,160 333333 FFFFFF}
+${upspeedgraph enp4s0 26,160 333333 FFFFFF}${alignr 0}${downspeedgraph enp4s0 26,160 333333 FFFFFF}
 ${color5}Up: ${color}${upspeed enp4s0}${color5}${alignr 0}Down: ${color}${downspeed enp4s0}
 ${color5}Sent: ${color}${totalup enp4s0}${color5}${alignr 0}Received: ${color}${totaldown enp4s0}
 ${endif}
 ${if_existing /proc/net/route wlp3s0}
-${upspeedgraph wlp3s0 26,140 FFFFFF FFFFFF}${goto 250}${downspeedgraph wlp3s0 26,140 333333 FFFFFF}
+${upspeedgraph wlp3s0 26,140 333333 FFFFFF}${goto 250}${downspeedgraph wlp3s0 26,140 333333 FFFFFF}
 ${color5}Up: ${color}${upspeed wlp3s0}${color5}${goto 250}Down: ${color}${downspeed wlp3s0}
 ${color5}Sent: ${color}${totalup wlp3s0}${color5}${goto 250}Received: ${color}${totaldown wlp3s0}
 ${endif}
