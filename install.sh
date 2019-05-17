@@ -10,10 +10,20 @@ sudo apt-get install -y git zsh tree \
      npm openjdk-8-jdk openjdk-8-jre \
      wicd-curses gimp dmenu python-pip \
      python3-pip unclutter xsel compton \
-     compton-conf
+     compton-conf libjpeg-dev zlib1g-dev
 
 sudo pip install jupyter 'python-language-server[all]' \
      importmagic epc
+
+#####################################
+#          Ranger
+#####################################
+
+git clone git@github.com:AlEmerich/ranger.git
+cd ranger && sudo make install
+cp ranger/rc.conf ranger_conf/rc.conf
+mkdir $HOME/.config/ranger
+ln -s $PWD/ranger_conf $HOME/.config/ranger
 
 #####################################
 #          Dropbox
@@ -42,7 +52,7 @@ ln -s $PWD/zsh/zlogout $HOME/.zlogout
 ln -s $PWD/zsh/zpreztorc $HOME/.zpreztorc
 ln -s $PWD/zsh/zprofile $HOME/.zprofile
 ln -s $PWD/zsh/zshenv $HOME/.zshenv
-ln -s $PWD/zsh/zshrc $HOME/.zshrc 
+ln -s $PWD/zsh/zshrc $HOME/.zshrc
 
 #####################################
 #           Emacs
@@ -56,9 +66,9 @@ sudo apt-get install emacs26
 #           Spacemacs
 #####################################
 
-rm -rf ~/.emacs.d
-ln -s $PWD/spacemacs/.spacemacs ~/.spacemacs
-ln -s $PWD/spacemacs/.emacs.d ~/.emacs.d
+rm -rf $HOME/.emacs.d
+ln -s $PWD/spacemacs/.spacemacs $HOME/.spacemacs
+ln -s $PWD/spacemacs/.emacs.d $HOME/.emacs.d
 
 #####################################
 #           Awesome
@@ -67,21 +77,21 @@ ln -s $PWD/spacemacs/.emacs.d ~/.emacs.d
 # Base
 sudo apt-get install -y awesome
 git clone  --recursive git@github.com:AlEmerich/awesome-copycats.git
-ln -s $PWD/awesome-copycats ~/.config/awesome
+ln -s $PWD/awesome-copycats $HOME/.config/awesome
 sudo ln -s $PWD/xsessions/awesome.desktop /usr/share/xsessions/awesome.desktop
 
-#icon 
+#icon
 git clone https://github.com/horst3180/arc-icon-theme
 cd arc-icon-theme && ./autogen.sh --prefix=/usr && sudo make install
 
 # Locker
 sudo apt-get install -y i3lock scrot \
      imagemagick x11-xserver-utils
-     
+
 #####################################
 #         FONTS
 ##################################### 
-FONT_HOME = ~/.local/share/fonts
+FONT_HOME = $HOME/.local/share/fonts
 
 wget http://pavelmakhov.com/awesome-wm-widgets/assets/fonts/awesomewm-font.ttf 
 sudo cp awesomewm-font.ttf $FONT_HOME
@@ -101,8 +111,8 @@ mkdir -p "$FONT_HOME/adobe-fonts/source_code_pro"
 sudo apt-get install keepassx
 sudo npm install -g keepass-dmenu
 
-mkdir ~/.local/bin/
-export KPD_SCRIPT=~/.local/bin/local_keepass_dmenu.sh
+mkdir $HOME/.local/bin/
+export KPD_SCRIPT=$HOME/.local/bin/local_keepass_dmenu.sh
 touch $KPD_SCRIPT
 read -p "Path of Keepass databse: " path
 read -p "Password: " password
@@ -130,16 +140,16 @@ sudo ldconfig
 sudo mkdir -p /lib/terminfo/x
 sudo ln -s /usr/local/share/terminfo/x/xterm-termite /lib/terminfo/x/xterm-termite 
 
-ln -s $PWD/termite_conf/ ~/.config/termite
+ln -s $PWD/termite_conf/ $HOME/.config/termite
 
 #####################################
 #           Systemd
 #####################################
 
-mkdir ~/.config/systemd
-mkdir ~/.config/systemd/user
-ln -s $PWD/systemd/emacs.service ~/.config/systemd/user/emacs.service
-ln -s $PWD/systemd/dropbox.service ~/.config/systemd/user/dropbox.service
+mkdir $HOME/.config/systemd
+mkdir $HOME/.config/systemd/user
+ln -s $PWD/systemd/emacs.service $HOME/.config/systemd/user/emacs.service
+ln -s $PWD/systemd/dropbox.service $HOME/.config/systemd/user/dropbox.service
 
 systemctl --user enable emacs
 systemctl --user start emacs

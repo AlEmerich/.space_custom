@@ -1,0 +1,7 @@
+shell
+shell echo "Test"
+
+rename jts-1.14.zip
+shell 
+shell q
+shell qq

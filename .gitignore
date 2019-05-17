@@ -1,3 +1,5 @@
-tmux/tmux-plugins
-.DS_Store
-*/.DS_Store
+vte-ng
+termite
+awesome-copycats
+ranger
+spacemacs/.emacs.d/
