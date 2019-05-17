@@ -88,6 +88,11 @@ cd arc-icon-theme && ./autogen.sh --prefix=/usr && sudo make install
 sudo apt-get install -y i3lock scrot \
      imagemagick x11-xserver-utils
 
+# Conky
+sudo apt-get install conky-all
+ln -s $HOME/dotfiles/conky $HOME/.conky
+ln -s $HOME/dotfiles/conky/conkyrc $HOME/.conkyrc
+
 #####################################
 #         FONTS
 ##################################### 
