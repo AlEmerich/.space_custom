@@ -12,4 +12,5 @@ fi
 
 # Initialisation
 alias "e"="emacsclient26 -c"
+alias "esudo"="sudo emacs -nw -Q"
 source /usr/local/bin/virtualenvwrapper.sh

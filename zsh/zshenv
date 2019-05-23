@@ -14,6 +14,7 @@ export LIBRARY_PATH="/usr/include/gtk-3.0:$LIBRARY_PATH"
 export LD_LIBRARY_PATH="/usr/local/cuda-9.0/lib64:$LD_LIBRARY_FOUND"
 export PATH="/usr/local/cuda-9.0/bin:$PATH"
 export SHELL="/bin/zsh"
+export VISUAL="emacsclient -nw"
 export WORKON_HOME=$HOME/.virtualenvs
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
