@@ -1,5 +1,28 @@
 # INITIALISATION SCRIPT
 
+mode=${mode:-ssh}
+
+while [ $# -gt 0 ]; do
+	if [[ $1 == *"--"* ]]; then
+		param="${1/--/}"
+		declare $param="$2"
+	fi
+shift
+done
+
+echo "MODE $mode"
+
+if [ $mode == "ssh" ]
+then GIT_PREFIX="git@github.com:AlEmerich"
+elif [ $mode == "https" ]
+then GIT_PREFIX="https://github.com/AlEmerich"
+else
+echo "Unknown parameter: $mode. You have to choose ssh or https."
+exit 0
+fi
+
+echo "git prefix: $GIT_PREFIX"
+
 #####################################
 #          BASE TOOLS
 #####################################
@@ -19,7 +42,7 @@ sudo pip install jupyter 'python-language-server[all]' \
 #          Ranger
 #####################################
 
-git clone git@github.com:AlEmerich/ranger.git
+git clone $GIT_PREFIX/ranger.git
 cd ranger && sudo make install
 cp ranger/rc.conf ranger_conf/rc.conf
 mkdir $HOME/.config/ranger
@@ -44,7 +67,7 @@ sudo pip install virtualenv virtualenvwrapper
 #           Zsh/Zprezto
 #####################################
 
-git clone --recursive git@github.com:AlEmerich/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
+git clone --recursive $GIT_PREFIX/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
 chsh -s /bin/zsh
 
 ln -s $PWD/zsh/zlogin $HOME/.zlogin
@@ -76,7 +99,9 @@ ln -s $PWD/spacemacs/.emacs.d $HOME/.emacs.d
 
 # Base
 sudo apt-get install -y awesome
-git clone  --recursive git@github.com:AlEmerich/awesome-copycats.git
+git clone  $GIT_PREFIX/awesome-copycats.git
+git clone https://github.com/lcpz/awesome-freedesktop awesome-copycats/freedesktop
+git clone https://github.com/lcpz/lain.git awesome-copycats/lain
 ln -s $PWD/awesome-copycats $HOME/.config/awesome
 sudo ln -s $PWD/xsessions/awesome.desktop /usr/share/xsessions/awesome.desktop
 
@@ -97,6 +122,7 @@ ln -s $HOME/dotfiles/conky/conkyrc $HOME/.conkyrc
 #         FONTS
 ##################################### 
 FONT_HOME = $HOME/.local/share/fonts
+mkdir -p $FOME_HOME
 
 wget http://pavelmakhov.com/awesome-wm-widgets/assets/fonts/awesomewm-font.ttf 
 sudo cp awesomewm-font.ttf $FONT_HOME
