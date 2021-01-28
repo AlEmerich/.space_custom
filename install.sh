@@ -1,4 +1,5 @@
 # INITIALISATION SCRIPT
+# prerequisites: git, dropbox
 
 mode=${mode:-ssh}
 
@@ -27,15 +28,15 @@ echo "git prefix: $GIT_PREFIX"
 #          BASE TOOLS
 #####################################
 
-sudo apt-get install -y git zsh tree \
+sudo apt-get install -y zsh tree \
      fonts-powerline xautolock alsa-base \
      alsa-utils xbacklight xclip nodejs \
      npm openjdk-8-jdk openjdk-8-jre \
-     wicd-curses gimp dmenu python-pip \
-     python3-pip unclutter xsel compton \
-     compton-conf libjpeg-dev zlib1g-dev
+     gimp dmenu python3-pip \
+     python-is-python3 unclutter xsel \
+     libjpeg-dev zlib1g-dev autoconf
 
-sudo pip install jupyter 'python-language-server[all]' \
+sudo pip3 install jupyter 'python-language-server[all]' \
      importmagic epc
 
 #####################################
@@ -44,17 +45,9 @@ sudo pip install jupyter 'python-language-server[all]' \
 
 git clone $GIT_PREFIX/ranger.git
 cd ranger && sudo make install
-cp ranger/rc.conf ranger_conf/rc.conf
+cp ranger_conf/rc.conf ranger/rc.conf
 mkdir $HOME/.config/ranger
 ln -s $PWD/ranger_conf $HOME/.config/ranger
-
-#####################################
-#          Dropbox
-#####################################
-
-wget https://linux.dropbox.com/packages/ubuntu/dropbox_2015.10.28_amd64.deb
-sudo dpkg -i dropbox_2015.10.28_amd64.deb
-sudo apt-get install -f
 
 #####################################
 #          Virtualenv
@@ -148,30 +141,6 @@ touch $KPD_SCRIPT
 read -p "Path of Keepass databse: " path
 read -p "Password: " password
 echo "keepass-dmenu --database $path --password $password" >> $KPD_SCRIPT
-
-#####################################
-#           Termite
-#####################################
-
-# Dependencies
-sudo apt-get install -y g++ libgtk-3-dev gtk-doc-tools \
-     gnutls-bin valac intltool libpcre2-dev libglib3.0-cil-dev \
-     libgnutls28-dev libgirepository1.0-dev libxml2-utils \
-     gperf build-essential
-
-# vte-ng
-git clone https://github.com/thestinger/vte-ng.git
-export LIBRARY_PATH="/usr/include/gtk-3.0:$LIBRARY_PATH"
-cd vte-ng && ./autogen.sh && make && sudo make install
-
-# termite
-git clone --recursive https://github.com/thestinger/termite.git
-cd termite && make && sudo make install
-sudo ldconfig
-sudo mkdir -p /lib/terminfo/x
-sudo ln -s /usr/local/share/terminfo/x/xterm-termite /lib/terminfo/x/xterm-termite 
-
-ln -s $PWD/termite_conf/ $HOME/.config/termite
 
 #####################################
 #           Systemd
